@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Ejercicios: Unidad seguida de ceros</title>
+    <style>
+        /* ESTILOS GENERALES (PANTALLA) */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .controls {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            text-align: center;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        h1 { color: #2c3e50; margin-top: 0; }
+        
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+
+        button:hover { background-color: #2980b9; }
+        button.print-btn { background-color: #27ae60; }
+        button.print-btn:hover { background-color: #219150; }
+
+        /* ESTILOS DE LA HOJA DE PAPEL */
+        .page-container {
+            width: 210mm;
+            min-height: 297mm;
+            background: white;
+            padding: 20mm;
+            box-shadow: 0 0 10px rgba(0,0,0,0.15);
+            margin-bottom: 20px;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        .header-school {
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .student-data p { margin: 5px 0; font-size: 14px; color: #555; }
+        
+        .grid-exercises {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px 40px; /* Espacio entre filas y columnas */
+        }
+
+        .exercise-item {
+            font-size: 18px;
+            padding: 10px;
+            border-bottom: 1px dashed #ccc; /* Línea para escribir */
+        }
+
+        .exercise-number {
+            font-weight: bold;
+            color: #555;
+            margin-right: 10px;
+        }
+
+        .title-sheet {
+            text-align: center;
+            text-transform: uppercase;
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+        /* --- MODO IMPRESIÓN (PDF) --- */
+        @media print {
+            body { 
+                background: none; 
+                margin: 0; 
+                padding: 0; 
+            }
+            .controls { display: none !important; } /* Ocultar botones */
+            
+            .page-container {
+                box-shadow: none;
+                margin: 0;
+                width: 100%;
+                height: 100%;
+                page-break-after: always; /* Forzar salto de página tras cada hoja */
+            }
+
+            /* Evitar salto después de la última página */
+            .page-container:last-child { page-break-after: avoid; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="controls">
+        <h1>Generador de Operaciones</h1>
+        <p>Multiplicación y División de decimales por la unidad seguida de ceros.</p>
+        <button onclick="generateExercises()">🔄 Generar Nuevos Ejercicios</button>
+        <button class="print-btn" onclick="window.print()">🖨️ Imprimir / Guardar PDF</button>
+    </div>
+
+    <div class="page-container" id="worksheet-page">
+        <div class="header-school">
+            <div class="student-data">
+                <p><strong>Nombre:</strong> ___________________________________</p>
+                <p><strong>Fecha:</strong> ________________</p>
+            </div>
+            <div class="student-data">
+                <p><strong>Curso:</strong> ______</p>
+            </div>
+        </div>
+        <h2 class="title-sheet">Ejercicios de Repaso</h2>
+        <div class="grid-exercises" id="exercises-list">
+            </div>
+    </div>
+
+    <div class="page-container" id="solutions-page">
+        <div class="header-school">
+            <div class="student-data">
+                <p><strong>HOJA DE SOLUCIONES</strong></p>
+            </div>
+        </div>
+        <h2 class="title-sheet">Solucionario</h2>
+        <div class="grid-exercises" id="solutions-list">
+            </div>
+    </div>
+
+    <script>
+        // Función auxiliar para formatear con coma decimal
+        function formatNumber(num) {
+            return num.toString().replace('.', ',');
+        }
+
+        function getRandomDecimal() {
+            // Número aleatorio entre 0 y 1000
+            let num = (Math.random() * 1000);
+            // Fijar a 2 decimales y convertir a número para lógica interna
+            return parseFloat(num.toFixed(2));
+        }
+
+        function getPowerOfTen() {
+            const powers = [10, 100, 1000, 10000];
+            return powers[Math.floor(Math.random() * powers.length)];
+        }
+
+        function generateExercises() {
+            const exerciseContainer = document.getElementById('exercises-list');
+            const solutionContainer = document.getElementById('solutions-list');
+            
+            // Limpiar contenido previo
+            exerciseContainer.innerHTML = '';
+            solutionContainer.innerHTML = '';
+
+            let exercises = [];
+
+            // 1. Generar 10 Multiplicaciones
+            for (let i = 0; i < 10; i++) {
+                let num = getRandomDecimal();
+                let power = getPowerOfTen();
+                
+                // Calculamos el resultado matemático puro
+                let rawResult = parseFloat((num * power).toFixed(4));
+
+                exercises.push({
+                    type: 'mult',
+                    // Guardamos ya formateado con coma para visualización
+                    text: `${formatNumber(num)} × ${power}`,
+                    result: formatNumber(rawResult)
+                });
+            }
+
+            // 2. Generar 10 Divisiones
+            for (let i = 0; i < 10; i++) {
+                let num = getRandomDecimal();
+                let power = getPowerOfTen();
+                
+                // Calculamos el resultado matemático puro
+                let rawResult = parseFloat((num / power).toFixed(6));
+
+                exercises.push({
+                    type: 'div',
+                    // Guardamos ya formateado con coma para visualización
+                    text: `${formatNumber(num)} : ${power}`,
+                    result: formatNumber(rawResult)
+                });
+            }
+
+            // 3. Mezclar aleatoriamente el array de 20 ejercicios
+            exercises.sort(() => Math.random() - 0.5);
+
+            // 4. Renderizar en el DOM
+            exercises.forEach((ex, index) => {
+                // HTML para la hoja del alumno
+                const itemHTML = `
+                    <div class="exercise-item">
+                        <span class="exercise-number">${index + 1}.</span> 
+                        ${ex.text} = 
+                    </div>
+                `;
+                exerciseContainer.innerHTML += itemHTML;
+
+                // HTML para la hoja de soluciones
+                const solHTML = `
+                    <div class="exercise-item">
+                        <span class="exercise-number">${index + 1}.</span> 
+                        ${ex.text} = <strong style="color: #c0392b">${ex.result}</strong>
+                    </div>
+                `;
+                solutionContainer.innerHTML += solHTML;
+            });
+        }
+
+        // Generar ejercicios al cargar la página
+        window.onload = generateExercises;
+    </script>
+</body>
+</html>
